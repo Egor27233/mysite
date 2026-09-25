@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ page.title }}</h1>
+<div style="line-height: 1.7; white-space: pre-wrap;">{{ page.content }}</div>
+
+{% if current_user.is_authenticated and current_user.is_admin %}
+    <hr style="margin: 25px 0;">
+    <a class="btn btn-warn" href="{{ url_for('edit_page', slug=page.slug) }}">
+        ✏ Редактировать страницу
+    </a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Вход</h1>
+<form method="post">
+    <label>Логин</label>
+    <input type="text" name="username" required autocomplete="username">
+    <label>Пароль</label>
+    <input type="password" name="password" required autocomplete="current-password">
+    <button type="submit">Войти</button>
+</form>
+<p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a></p>
+{% endblock %}

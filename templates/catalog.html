@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Каталог товаров</h1>
+
+<div style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;">
+    <a class="btn"
+       href="{{ url_for('catalog') }}"
+       style="{% if not current_cat %}background:#f39c12;{% else %}background:#95a5a6;{% endif %}">
+        Все товары
+    </a>
+    {% for c in categories %}
+        <a class="btn"
+           href="{{ url_for('catalog', cat=c.id) }}"
+           style="{% if current_cat and current_cat.id == c.id %}background:#f39c12;{% else %}background:#95a5a6;{% endif %}">
+            {{ c.name }}
+        </a>
+    {% endfor %}
+</div>
+
+{% if current_cat %}
+    <h2 style="color:#1a2a3a;">{{ current_cat.name }}</h2>
+    <p style="color:#666;">{{ current_cat.description }}</p>
+{% endif %}
+
+{% if items %}
+    <div class="products">
+        {% for item in items %}
+            <div class="product-card">
+                {% if item.is_hit %}
+                    <div class="badge-hit">Хит продаж</div>
+                {% endif %}
+                <div class="image-wrap">
+                    {% if item.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}">
+                    {% else %}
+                        <span class="no-img">💡</span>
+                    {% endif %}
+                </div>
+                <div class="info">
+                    <h3>{{ item.title }}</h3>
+                    <div class="specs">
+                        {% if item.lamps %}Ламп: {{ item.lamps }}<br>{% endif %}
+                        {% if item.diameter %}Диаметр: {{ item.diameter }}<br>{% endif %}
+                        {% if item.height %}Высота: {{ item.height }}{% endif %}
+                    </div>
+                    {% if item.price %}
+                        <div class="price">{{ '%.0f'|format(item.price) }} ₽</div>
+                    {% endif %}
+                    <div class="actions">
+                        <a class="btn-more" href="/item/{{ item.id }}">Подробнее</a>
+                        <a class="btn-buy" href="#" onclick="orderItem({{ item.id }}, '{{ item.title|e }}'); return false;">Купить</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="text-align:center; color:#999; padding: 40px;">Товаров не найдено.</p>
+{% endif %}
+
+<div class="modal-bg" id="orderModal">
+    <div class="modal">
+        <button class="close" onclick="closeOrderModal()">&times;</button>
+        <h3>Оформить заказ</h3>
+        <p id="orderItemTitle" style="color:#666; margin-top:0;"></p>
+        <form method="post" action="{{ url_for('create_order') }}">
+            <input type="hidden" name="item_id" id="orderItemId">
+            <label>Ваше имя</label>
+            <input type="text" name="name" required>
+            <label>Телефон</label>
+            <input type="tel" name="phone" required>
+            <label>Комментарий</label>
+            <textarea name="comment" rows="2"></textarea>
+            <button type="submit" style="width:100%;">Отправить заявку</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function orderItem(id, title) {
+    document.getElementById('orderItemId').value = id;
+    document.getElementById('orderItemTitle').textContent = 'Товар: ' + title;
+    document.getElementById('orderModal').classList.add('active');
+}
+function closeOrderModal() {
+    document.getElementById('orderModal').classList.remove('active');
+}
+</script>
+{% endblock %}

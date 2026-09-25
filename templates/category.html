@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>📁 {{ category.name }}</h1>
+<p>{{ category.description }}</p>
+<hr>
+
+{% if category.items %}
+    {% for item in category.items %}
+        <div class="card" style="display:flex; gap:15px;">
+            {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                     alt="{{ item.title }}"
+                     style="width:180px; height:180px; object-fit:cover; border-radius:8px;">
+            {% else %}
+                <div style="width:180px; height:180px; background:#eee; border-radius:8px;
+                            display:flex; align-items:center; justify-content:center;
+                            color:#aaa; font-size:40px;">🖼</div>
+            {% endif %}
+
+            <div style="flex:1;">
+                <h4>{{ item.title }}</h4>
+                <p>{{ item.content }}</p>
+
+                {% if item.price and item.price > 0 %}
+                    <p style="font-size:18px; color:#27ae60; font-weight:bold;">
+                        💰 {{ '%.2f'|format(item.price) }} ₽
+                    </p>
+                {% endif %}
+
+                {% if item.phone %}
+                    <p>📞 <a href="tel:{{ item.phone }}">{{ item.phone }}</a></p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>В этой категории пока ничего нет.</p>
+{% endif %}
+{% endblock %}

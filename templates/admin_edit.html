@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>✏ Редактирование товара #{{ item.id }}</h1>
+
+<form method="post" enctype="multipart/form-data"
+      style="background:#fff; padding:25px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+        <div>
+            <label>Название товара</label>
+            <input type="text" name="title" value="{{ item.title }}" required>
+        </div>
+        <div>
+            <label>Цена (₽)</label>
+            <input type="number" step="0.01" min="0" name="price" value="{{ item.price or 0 }}">
+        </div>
+    </div>
+
+    <label>Краткое описание</label>
+    <input type="text" name="description" value="{{ item.description or '' }}">
+
+    <label>Полное описание</label>
+    <textarea name="content" rows="4">{{ item.content or '' }}</textarea>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div>
+            <label>Кол-во ламп</label>
+            <input type="number" min="0" name="lamps" value="{{ item.lamps or 0 }}">
+        </div>
+        <div>
+            <label>Диаметр</label>
+            <input type="text" name="diameter" value="{{ item.diameter or '' }}">
+        </div>
+        <div>
+            <label>Высота</label>
+            <input type="text" name="height" value="{{ item.height or '' }}">
+        </div>
+    </div>
+
+    <label>Телефон</label>
+    <input type="text" name="phone" value="{{ item.phone or '' }}">
+
+    <label>Фотография</label>
+    {% if item.image %}
+        <div style="margin-bottom:8px;">
+            <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                 style="width:150px; height:150px; object-fit:cover; border-radius:8px;">
+            <div style="font-size:12px; color:#888;">Текущее фото (загрузите новое, чтобы заменить)</div>
+        </div>
+    {% endif %}
+    <input type="file" name="image" accept="image/*">
+
+    <label>Категория</label>
+    <select name="category_id">
+        {% for c in categories %}
+            <option value="{{ c.id }}" {% if c.id == item.category_id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label style="display:flex; gap:10px; align-items:center; margin: 10px 0;">
+        <input type="checkbox" name="is_hit" value="1" {% if item.is_hit %}checked{% endif %} style="width:auto;">
+        🔥 Хит продаж
+    </label>
+    <label style="display:flex; gap:10px; align-items:center; margin: 10px 0;">
+        <input type="checkbox" name="is_popular" value="1" {% if item.is_popular %}checked{% endif %} style="width:auto;">
+        ⭐ Популярное (на главной)
+    </label>
+
+    <button type="submit">💾 Сохранить</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_panel') }}">Отмена</a>
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>✏ Редактирование страницы: {{ page.title }}</h1>
+<p style="color:#666;">URL страницы: <code>/page/{{ page.slug }}</code></p>
+
+<form method="post">
+    <label>Заголовок страницы</label>
+    <input type="text" name="title" value="{{ page.title }}" required>
+
+    <label>Содержимое</label>
+    <textarea name="content" rows="15"
+              style="font-family: inherit; line-height: 1.6;">{{ page.content }}</textarea>
+
+    <p style="font-size:13px; color:#666;">
+        💡 Переносы строк сохраняются. Для отступов используй пробелы.
+    </p>
+
+    <button type="submit">💾 Сохранить</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_panel') }}">Отмена</a>
+</form>
+{% endblock %}

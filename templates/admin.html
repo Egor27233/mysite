@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>🛠 Админ-панель</h1>
+
+<!-- ============ НАСТРОЙКИ САЙТА ============ -->
+<div class="admin-section">
+    <h2>🎨 Настройки сайта</h2>
+    <form method="post" action="{{ url_for('update_appearance') }}" enctype="multipart/form-data">
+
+        <label>Название сайта (в шапке)</label>
+        <input type="text" name="site_title" value="{{ current_site_title }}" required>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>📞 Телефон (в шапке и футере)</label>
+                <input type="text" name="shop_phone" value="{{ current_shop_phone }}"
+                       placeholder="+7 (999) 123-45-67" required>
+            </div>
+            <div>
+                <label>🕐 Режим работы</label>
+                <input type="text" name="shop_schedule" value="{{ current_shop_schedule }}"
+                       placeholder="с 8:00 до 22:00 без выходных">
+            </div>
+        </div>
+
+        <label>🏙 Город по умолчанию</label>
+        <input type="text" name="shop_city" value="{{ current_shop_city }}" placeholder="Москва">
+
+        <label>🏙 Список городов для выбора (через запятую)</label>
+        <textarea name="cities_list" rows="3"
+                  placeholder="Москва,Санкт-Петербург,Казань">{{ current_cities_list }}</textarea>
+        <p style="font-size:12px; color:#888; margin-top:-8px;">
+            💡 Города через запятую. Появятся в выпадающем списке в шапке.
+        </p>
+
+        <label>🎨 Цвет фона</label>
+        <input type="color" name="bg_color" value="{{ current_bg_color }}"
+               style="width:80px; height:45px; padding:2px;">
+
+        <label>🖼 Фоновое изображение (необязательно)</label>
+        {% if current_bg_image %}
+            <div style="width:200px; height:120px; border-radius:8px; border:1px solid #ccc;
+                        background-image: url('{{ url_for('static', filename='backgrounds/' + current_bg_image) }}');
+                        background-size: cover; background-position: center; margin-bottom:10px;"></div>
+            <label style="font-size:13px;">
+                <input type="checkbox" name="remove_bg_image" value="1" style="width:auto;">
+                Убрать фоновое изображение
+            </label>
+        {% endif %}
+        <input type="file" name="bg_image" accept="image/*">
+
+        <button type="submit">💾 Сохранить настройки</button>
+    </form>
+</div>
+
+<!-- ============ ЗАЯВКИ ============ -->
+<div class="admin-section">
+    <h2>📨 Заявки от клиентов</h2>
+    {% if orders %}
+    <table>
+        <tr>
+            <th>Дата</th><th>Имя</th><th>Телефон</th><th>Товар</th>
+            <th>Комментарий</th><th>Статус</th><th></th>
+        </tr>
+        {% for o in orders %}
+        <tr style="{% if o.is_processed %}opacity:0.5;{% endif %}">
+            <td>{{ o.created_at.strftime('%d.%m.%Y %H:%M') if o.created_at else '—' }}</td>
+            <td>{{ o.name }}</td>
+            <td><a href="tel:{{ o.phone }}">{{ o.phone }}</a></td>
+            <td>{% if o.item %}{{ o.item.title }}{% else %}—{% endif %}</td>
+            <td style="max-width:200px;">{{ o.comment or '—' }}</td>
+            <td>
+                {% if o.is_processed %}
+                    <span style="color:#27ae60;">✓ Обработана</span>
+                {% else %}
+                    <span style="color:#e74c3c;">● Новая</span>
+                {% endif %}
+            </td>
+            <td style="display:flex; gap:6px;">
+                <form method="post" action="{{ url_for('process_order', order_id=o.id) }}">
+                    <button class="btn-warn" type="submit">
+                        {% if o.is_processed %}Вернуть{% else %}Обработать{% endif %}
+                    </button>
+                </form>
+                <form method="post" action="{{ url_for('delete_order', order_id=o.id) }}"
+                      onsubmit="return confirm('Удалить заявку?');">
+                    <button class="btn-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p style="color:#888;">Заявок пока нет.</p>
+    {% endif %}
+</div>
+
+<!-- ============ МЕНЮ ============ -->
+<div class="admin-section">
+    <h2>📋 Главное меню</h2>
+
+    <form method="post" action="{{ url_for('add_menu_item') }}"
+          style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
+        <input type="text" name="title" placeholder="Название пункта" required style="flex:1; min-width:150px;">
+        <input type="text" name="url" placeholder="/ или /page/..." value="/" style="flex:2; min-width:200px;">
+        <button type="submit">Добавить</button>
+    </form>
+
+    <table>
+        <tr><th>ID</th><th>Порядок</th><th>Название</th><th>Ссылка</th><th></th></tr>
+        {% for m in menu %}
+        <tr>
+            <td>{{ m.id }}</td>
+            <td>
+                <form method="post" action="{{ url_for('edit_menu_item', mid=m.id) }}"
+                      style="display:flex; gap:5px;">
+                    <input type="number" name="order" value="{{ m.order }}" style="width:70px; margin:0;">
+            </td>
+            <td><input type="text" name="title" value="{{ m.title }}" style="margin:0;"></td>
+            <td><input type="text" name="url" value="{{ m.url }}" style="margin:0;"></td>
+            <td style="display:flex; gap:5px;">
+                    <button type="submit">💾</button>
+                </form>
+                <form method="post" action="{{ url_for('delete_menu_item', mid=m.id) }}"
+                      onsubmit="return confirm('Удалить пункт меню?');">
+                    <button class="btn-danger" type="submit">✖</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p style="font-size:13px; color:#666;">
+        💡 Ссылка может быть: <code>/</code>, <code>/catalog</code>,
+        <code>/page/about</code>, <code>https://example.com</code>.
+    </p>
+</div>
+
+<!-- ============ СТРАНИЦЫ ============ -->
+<div class="admin-section">
+    <h2>📄 Страницы сайта</h2>
+    <p style="font-size:13px; color:#666;">Отдельные страницы (О сайте, Контакты, Доставка и т.д.).</p>
+
+    <form method="post" action="{{ url_for('add_page') }}"
+          style="display:flex; gap:10px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
+        <input type="text" name="slug" placeholder="URL (delivery)" required style="flex:1; min-width:150px;">
+        <input type="text" name="title" placeholder="Заголовок (Доставка)" required style="flex:2; min-width:200px;">
+        <button type="submit">➕ Создать</button>
+    </form>
+
+    <table>
+        <tr><th>URL</th><th>Заголовок</th><th>Обновлено</th><th></th></tr>
+        {% for p in pages %}
+        <tr>
+            <td><code>/page/{{ p.slug }}</code></td>
+            <td>{{ p.title }}</td>
+            <td>{{ p.updated_at.strftime('%d.%m.%Y %H:%M') if p.updated_at else '—' }}</td>
+            <td style="display:flex; gap:6px;">
+                <a class="btn btn-warn" href="{{ url_for('edit_page', slug=p.slug) }}">✏ Изменить</a>
+                <a class="btn" href="{{ url_for('page_view', slug=p.slug) }}" target="_blank">👁 Открыть</a>
+                <form method="post" action="{{ url_for('delete_page', slug=p.slug) }}"
+                      onsubmit="return confirm('Удалить страницу?');">
+                    <button class="btn-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- ============ КАТЕГОРИИ ============ -->
+<div class="admin-section">
+    <h2>📁 Категории</h2>
+    <form method="post" action="{{ url_for('add_category') }}"
+          style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
+        <input type="text" name="name" placeholder="Название" required style="flex:1; min-width:150px;">
+        <input type="text" name="description" placeholder="Описание" style="flex:2; min-width:200px;">
+        <button type="submit">Добавить</button>
+    </form>
+
+    <table>
+        <tr><th>ID</th><th>Название</th><th>Описание</th><th>Товаров</th><th></th></tr>
+        {% for c in categories %}
+        <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.description }}</td>
+            <td>{{ c.items|length }}</td>
+            <td>
+                <form method="post" action="{{ url_for('delete_category', cat_id=c.id) }}"
+                      onsubmit="return confirm('Удалить категорию и все её товары?');">
+                    <button class="btn-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- ============ ТОВАРЫ ============ -->
+<div class="admin-section">
+    <h2>📝 Товары</h2>
+    <form method="post" action="{{ url_for('add_item') }}" enctype="multipart/form-data">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+            <div>
+                <label>Название товара</label>
+                <input type="text" name="title" required>
+            </div>
+            <div>
+                <label>Цена (₽)</label>
+                <input type="number" step="0.01" min="0" name="price" value="0">
+            </div>
+        </div>
+
+        <label>Краткое описание (под фото)</label>
+        <input type="text" name="description" placeholder="Роскошная люстра с подвесками">
+
+        <label>Полное описание</label>
+        <textarea name="content" rows="3"></textarea>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Кол-во ламп</label>
+                <input type="number" min="0" name="lamps" value="0">
+            </div>
+            <div>
+                <label>Диаметр</label>
+                <input type="text" name="diameter" placeholder="750 мм">
+            </div>
+            <div>
+                <label>Высота</label>
+                <input type="text" name="height" placeholder="800 мм">
+            </div>
+        </div>
+
+        <label>Телефон (необязательно)</label>
+        <input type="text" name="phone" placeholder="+7 999 123-45-67">
+
+        <label>Фото</label>
+        <input type="file" name="image" accept="image/*">
+
+        <label>Категория</label>
+        <select name="category_id" required>
+            {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label style="display:flex; gap:10px; align-items:center; margin: 10px 0;">
+            <input type="checkbox" name="is_hit" value="1" style="width:auto;">
+            🔥 Хит продаж
+        </label>
+        <label style="display:flex; gap:10px; align-items:center; margin: 10px 0;">
+            <input type="checkbox" name="is_popular" value="1" style="width:auto;">
+            ⭐ Популярное (на главной)
+        </label>
+
+        <button type="submit">➕ Добавить товар</button>
+    </form>
+
+    <table>
+        <tr><th>ID</th><th>Фото</th><th>Название</th><th>Цена</th><th>Категория</th><th>Метки</th><th></th></tr>
+        {% for i in items %}
+        <tr>
+            <td>{{ i.id }}</td>
+            <td>
+                {% if i.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + i.image) }}"
+                         class="zoomable"
+                         style="width:60px; height:60px; object-fit:cover; border-radius:6px;"
+                         title="Нажмите для увеличения">
+                {% else %}
+                    <span style="color:#bbb;">—</span>
+                {% endif %}
+            </td>
+            <td>{{ i.title }}</td>
+            <td>{% if i.price %}{{ '%.0f'|format(i.price) }} ₽{% else %}—{% endif %}</td>
+            <td>{{ i.category.name }}</td>
+            <td>
+                {% if i.is_hit %}<span style="color:#e74c3c;">🔥</span>{% endif %}
+                {% if i.is_popular %}<span style="color:#f39c12;">⭐</span>{% endif %}
+            </td>
+            <td style="display:flex; gap:6px;">
+                <a class="btn btn-warn" href="{{ url_for('edit_item', item_id=i.id) }}">✏</a>
+                <form method="post" action="{{ url_for('delete_item', item_id=i.id) }}"
+                      onsubmit="return confirm('Удалить товар?');">
+                    <button class="btn-danger" type="submit">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- ============ ПОЛЬЗОВАТЕЛИ ============ -->
+<div class="admin-section">
+    <h2>👥 Пользователи</h2>
+    <table>
+        <tr><th>ID</th><th>Логин</th><th>Роль</th></tr>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{% if u.is_admin %}Админ{% else %}Пользователь{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

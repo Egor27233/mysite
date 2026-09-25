@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="features">
+    <div class="feature"><div class="icon">🚚</div><h4>Курьерская доставка</h4><p>По всей России</p></div>
+    <div class="feature"><div class="icon">💳</div><h4>Оплата при получении</h4><p>Без предоплаты</p></div>
+    <div class="feature"><div class="icon">📐</div><h4>Изготовление по размерам</h4><p>Любая сложность</p></div>
+    <div class="feature"><div class="icon">🔧</div><h4>Монтаж</h4><p>Профессиональная установка</p></div>
+</div>
+
+<h2 class="section-title">Популярные товары</h2>
+
+{% if popular %}
+    <div class="products">
+        {% for item in popular %}
+            <div class="product-card">
+                {% if item.is_hit %}
+                    <div class="badge-hit">Хит продаж</div>
+                {% endif %}
+                <div class="image-wrap">
+                    {% if item.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}">
+                    {% else %}
+                        <span class="no-img">💡</span>
+                    {% endif %}
+                </div>
+                <div class="info">
+                    <h3>{{ item.title }}</h3>
+                    <div class="specs">
+                        {% if item.lamps %}Ламп: {{ item.lamps }}<br>{% endif %}
+                        {% if item.diameter %}Диаметр: {{ item.diameter }}<br>{% endif %}
+                        {% if item.height %}Высота: {{ item.height }}{% endif %}
+                    </div>
+                    {% if item.price %}
+                        <div class="price">{{ '%.0f'|format(item.price) }} ₽</div>
+                    {% endif %}
+                    <div class="actions">
+                        <a class="btn-more" href="/item/{{ item.id }}">Подробнее</a>
+                        <a class="btn-buy" href="#" onclick="orderItem({{ item.id }}, '{{ item.title|e }}'); return false;">Купить</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="text-align:center; color:#999;">В каталоге пока нет товаров. Добавьте их в админке.</p>
+{% endif %}
+
+<h2 class="section-title">Как купить</h2>
+<div class="steps">
+    <div class="step"><div class="num">1</div><p>Выбираете товар или мы помогаем вам выбрать</p></div>
+    <div class="step"><div class="num">2</div><p>Выбираете способ оплаты и оформляете заказ</p></div>
+    <div class="step"><div class="num">3</div><p>Мы подтверждаем заказ и комплектуем его</p></div>
+    <div class="step"><div class="num">4</div><p>Доставляем заказ вам!</p></div>
+</div>
+
+<h2 class="section-title">Доставка</h2>
+<div style="background:#fff; padding:25px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); line-height:1.7;">
+    <p>Мы осуществляем курьерскую доставку по всей России. С нашей помощью купить товар в любом городе РФ становится легко, выгодно и удобно.</p>
+    <p>Оплата производится при получении товара — вы платите только после того, как убедитесь в качестве.</p>
+</div>
+
+<h2 class="section-title">Заказать по размерам заказчика</h2>
+<div class="steps">
+    <div class="step"><div class="num">1</div><p>С помощью нашего специалиста подбираем товар по вашим параметрам</p></div>
+    <div class="step"><div class="num">2</div><p>Заключаем договор и составляем спецификацию товара</p></div>
+    <div class="step"><div class="num">3</div><p>В кратчайшие сроки изготавливаем ваш заказ</p></div>
+    <div class="step"><div class="num">4</div><p>Подбираем надёжную и быструю доставку до клиента</p></div>
+</div>
+
+<h2 class="section-title">10 причин работать с нами</h2>
+<div class="features">
+    <div class="feature"><div class="icon">💰</div><h4>Гарантия лучшей цены</h4></div>
+    <div class="feature"><div class="icon">📦</div><h4>Широчайший ассортимент</h4></div>
+    <div class="feature"><div class="icon">🚗</div><h4>Выезд для подбора</h4></div>
+    <div class="feature"><div class="icon">⚡</div><h4>Кратчайшие сроки</h4></div>
+    <div class="feature"><div class="icon">🚚</div><h4>Быстрая доставка</h4></div>
+    <div class="feature"><div class="icon">👤</div><h4>Личный менеджер</h4></div>
+    <div class="feature"><div class="icon">🔄</div><h4>100% замена брака</h4></div>
+    <div class="feature"><div class="icon">🛡</div><h4>Стабильная работа</h4></div>
+    <div class="feature"><div class="icon">🔧</div><h4>Установка</h4></div>
+    <div class="feature"><div class="icon">⏳</div><h4>Более 10 лет работы</h4></div>
+</div>
+
+<div class="modal-bg" id="orderModal">
+    <div class="modal">
+        <button class="close" onclick="closeOrderModal()">&times;</button>
+        <h3>Оформить заказ</h3>
+        <p id="orderItemTitle" style="color:#666; margin-top:0;"></p>
+        <form method="post" action="{{ url_for('create_order') }}">
+            <input type="hidden" name="item_id" id="orderItemId">
+            <label>Ваше имя</label>
+            <input type="text" name="name" required>
+            <label>Телефон</label>
+            <input type="tel" name="phone" required placeholder="+7 (___) ___-__-__">
+            <label>Комментарий (необязательно)</label>
+            <textarea name="comment" rows="2"></textarea>
+            <button type="submit" style="width:100%;">Отправить заявку</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function orderItem(id, title) {
+    document.getElementById('orderItemId').value = id;
+    document.getElementById('orderItemTitle').textContent = 'Товар: ' + title;
+    document.getElementById('orderModal').classList.add('active');
+}
+function closeOrderModal() {
+    document.getElementById('orderModal').classList.remove('active');
+}
+</script>
+
+{% endblock %}
