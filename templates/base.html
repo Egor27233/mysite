@@ -582,8 +582,17 @@
     </div>
 
     <nav class="main-menu">
+        <a href="/">Главная</a>
+        <a href="/catalog">Каталог</a>
+
+        {% for c in categories_for_menu %}
+            <a href="/catalog?cat={{ c.id }}">{{ c.name }}</a>
+        {% endfor %}
+
         {% for m in menu_items %}
-            <a href="{{ m.url }}">{{ m.title }}</a>
+            {% if m.url != '/' and m.url != '/catalog' %}
+                <a href="{{ m.url }}">{{ m.title }}</a>
+            {% endif %}
         {% endfor %}
     </nav>
 

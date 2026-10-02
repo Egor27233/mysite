@@ -296,6 +296,7 @@ def inject_globals():
     cities = [c.strip() for c in cities_str.split(',') if c.strip()]
     return {
         'menu_items': MenuItem.query.order_by(MenuItem.order).all(),
+        'categories_for_menu': Category.query.all(),
         'site_title': get_setting('site_title', '💡 Гусь-Люстра'),
         'bg_color': get_setting('bg_color', '#f4f6f9'),
         'bg_image': get_setting('bg_image', ''),
@@ -305,7 +306,6 @@ def inject_globals():
         'cities': cities,
         'current_city': get_current_city(),
     }
-
 
 # ---------- СМЕНА ГОРОДА ----------
 @app.route('/set-city', methods=['POST'])
