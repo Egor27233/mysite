@@ -1,13 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="features">
-    <div class="feature"><div class="icon">🚚</div><h4>Курьерская доставка</h4><p>По всей России</p></div>
-    <div class="feature"><div class="icon">💳</div><h4>Оплата при получении</h4><p>Без предоплаты</p></div>
-    <div class="feature"><div class="icon">📐</div><h4>Изготовление по размерам</h4><p>Любая сложность</p></div>
-    <div class="feature"><div class="icon">🔧</div><h4>Монтаж</h4><p>Профессиональная установка</p></div>
-</div>
-
+<!-- Популярные товары -->
 <h2 class="section-title">Популярные товары</h2>
 
 {% if popular %}
@@ -46,6 +40,7 @@
     <p style="text-align:center; color:#999;">В каталоге пока нет товаров. Добавьте их в админке.</p>
 {% endif %}
 
+<!-- Как купить -->
 <h2 class="section-title">Как купить</h2>
 <div class="steps">
     <div class="step"><div class="num">1</div><p>Выбираете товар или мы помогаем вам выбрать</p></div>
@@ -54,12 +49,14 @@
     <div class="step"><div class="num">4</div><p>Доставляем заказ вам!</p></div>
 </div>
 
+<!-- Доставка -->
 <h2 class="section-title">Доставка</h2>
 <div style="background:#fff; padding:25px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); line-height:1.7;">
     <p>Мы осуществляем курьерскую доставку по всей России. С нашей помощью купить товар в любом городе РФ становится легко, выгодно и удобно.</p>
     <p>Оплата производится при получении товара — вы платите только после того, как убедитесь в качестве.</p>
 </div>
 
+<!-- Заказать по размерам -->
 <h2 class="section-title">Заказать по размерам заказчика</h2>
 <div class="steps">
     <div class="step"><div class="num">1</div><p>С помощью нашего специалиста подбираем товар по вашим параметрам</p></div>
@@ -68,6 +65,7 @@
     <div class="step"><div class="num">4</div><p>Подбираем надёжную и быструю доставку до клиента</p></div>
 </div>
 
+<!-- 10 причин -->
 <h2 class="section-title">10 причин работать с нами</h2>
 <div class="features">
     <div class="feature"><div class="icon">💰</div><h4>Гарантия лучшей цены</h4></div>
@@ -82,6 +80,7 @@
     <div class="feature"><div class="icon">⏳</div><h4>Более 10 лет работы</h4></div>
 </div>
 
+<!-- Модалка заказа -->
 <div class="modal-bg" id="orderModal">
     <div class="modal">
         <button class="close" onclick="closeOrderModal()">&times;</button>
