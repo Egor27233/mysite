@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
+{% block title %}{% if current_cat %}{{ current_cat.name }} — купить в СтеклоТутГусь{% else %}Каталог стеклянной посуды и хрустальных люстр{% endif %}{% endblock %}
+{% block meta_description %}{% if current_cat %}{{ current_cat.name }}. {{ current_cat.description }}. Широкий выбор, доставка по России, оплата при получении.{% else %}Каталог стеклянной посуды, хрустальных люстр, менажниц, графинов, салатников. Доставка по всей России, оплата при получении.{% endif %}{% endblock %}
+{% block meta_keywords %}{% if current_cat %}{{ current_cat.name }}, купить, цена, Гусь-Хрустальный{% else %}менажница, графин, стеклянная посуда, хрустальные люстры, каталог{% endif %}{% endblock %}
+{% block og_title %}{% if current_cat %}{{ current_cat.name }} — СтеклоТутГусь{% else %}Каталог — СтеклоТутГусь{% endif %}{% endblock %}
 {% block content %}
-<h1>Каталог товаров</h1>
+<h1>{% if current_cat %}{{ current_cat.name }}{% else %}Каталог товаров{% endif %}</h1>
 
 <div style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;">
     <a class="btn"
@@ -18,7 +22,6 @@
 </div>
 
 {% if current_cat %}
-    <h2 style="color:#1a2a3a;">{{ current_cat.name }}</h2>
     <p style="color:#666;">{{ current_cat.description }}</p>
 {% endif %}
 
@@ -31,7 +34,8 @@
                 {% endif %}
                 <div class="image-wrap">
                     {% if item.image %}
-                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}">
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                             alt="{{ item.title }} — купить в СтеклоТутГусь">
                     {% else %}
                         <span class="no-img">💡</span>
                     {% endif %}

@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% block title %}{{ item.title }} — купить в СтеклоТутГусь, цена {{ '%.0f'|format(item.price) }} ₽{% endblock %}
+{% block meta_description %}{{ item.title }}. {{ item.description }}. Цена {{ '%.0f'|format(item.price) }} ₽. Доставка по России, оплата при получении.{% endblock %}
+{% block meta_keywords %}{{ item.title }}, {{ item.category.name }}, купить, цена, Гусь-Хрустальный{% endblock %}
+{% block og_title %}{{ item.title }} — СтеклоТутГусь{% endblock %}
 {% block content %}
 <div style="background:#fff; padding:25px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <p style="color:#888; font-size:13px; margin-bottom:15px;">
@@ -14,7 +18,7 @@
                 <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
                      class="item-main-image"
                      style="width:100%; border-radius:8px; cursor:zoom-in;"
-                     alt="{{ item.title }}"
+                     alt="{{ item.title }} — купить в СтеклоТутГусь"
                      title="Нажмите, чтобы увеличить">
                 <p style="font-size:12px; color:#888; text-align:center; margin-top:8px;">
                     🔍 Нажмите на фото для увеличения
@@ -28,7 +32,7 @@
         </div>
 
         <div>
-            <h1 style="margin-top:0; color:#1a2a3a;">{{ item.title }}</h1>
+            <h1 style="margin-top:0; color:#1a2a3a; font-size:26px;">{{ item.title }}</h1>
 
             {% if item.description %}
                 <p style="color:#666; font-size:15px;">{{ item.description }}</p>
@@ -62,6 +66,13 @@
                 <hr style="margin: 25px 0; border:none; border-top:1px solid #eee;">
                 <div style="line-height:1.7; white-space:pre-wrap;">{{ item.content }}</div>
             {% endif %}
+
+            <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                Смотрите также:
+                <a href="/catalog?cat={{ item.category.id }}" style="color: #f39c12;">
+                    все товары категории «{{ item.category.name }}»
+                </a>
+            </p>
         </div>
     </div>
 </div>
@@ -101,7 +112,7 @@
             <label>Ваше имя</label>
             <input type="text" name="name" required>
             <label>Телефон</label>
-            <input type="tel" name="phone" required>
+            <input type="tel" name="phone" required placeholder="+7 (___) ___-__-__">
             <label>Комментарий</label>
             <textarea name="comment" rows="2"></textarea>
             <button type="submit" style="width:100%;">Отправить заявку</button>
@@ -117,6 +128,29 @@ function orderItem(id, title) {
 }
 function closeOrderModal() {
     document.getElementById('orderModal').classList.remove('active');
+}
+</script>
+
+<!-- Schema.org для поисковиков -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ item.title }}",
+  "description": "{{ item.description|e }}",
+  "category": "{{ item.category.name }}",
+  {% if item.image %}"image": "https://posudagustut-ru.ru{{ url_for('static', filename='uploads/' + item.image) }}",{% endif %}
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ '%.0f'|format(item.price) }}",
+    "priceCurrency": "RUB",
+    "availability": "https://schema.org/InStock",
+    "url": "https://posudagustut-ru.ru/item/{{ item.id }}",
+    "seller": {
+      "@type": "Organization",
+      "name": "СтеклоТутГусь"
+    }
+  }
 }
 </script>
 {% endblock %}

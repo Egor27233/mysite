@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, abort, make_response
+from flask import Flask, render_template, redirect, url_for, request, flash, abort, make_response, Response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -133,19 +133,17 @@ def set_setting(key, value):
 
 
 def get_current_city():
-    """Город из cookie или из настроек по умолчанию."""
     city = request.cookies.get('user_city')
     if city:
         return city
     return get_setting('shop_city', 'Москва')
 
 
-# ---------- ИНИЦИАЛИЗАЦИЯ ----------
+# ---------- ИНИЦИАЛИЗАЦИЯ БД ----------
 def init_db():
     with app.app_context():
         db.create_all()
 
-        # миграция старых таблиц item
         inspector = inspect(db.engine)
         cols = [c['name'] for c in inspector.get_columns('item')]
         with db.engine.connect() as conn:
@@ -169,15 +167,14 @@ def init_db():
                 conn.execute(text("ALTER TABLE item ADD COLUMN is_popular BOOLEAN DEFAULT 0"))
             conn.commit()
 
-        # настройки оформления
         if not db.session.get(Setting, 'bg_color'):
             set_setting('bg_color', '#f4f6f9')
         if not db.session.get(Setting, 'bg_image'):
             set_setting('bg_image', '')
         if not db.session.get(Setting, 'site_title'):
-            set_setting('site_title', '💡 Гусь-Люстра')
+            set_setting('site_title', 'СтеклоТутГусь')
         if not db.session.get(Setting, 'shop_phone'):
-            set_setting('shop_phone', '+7 (999) 123-45-67')
+            set_setting('shop_phone', '+7 (904) 859-87-41')
         if not db.session.get(Setting, 'shop_schedule'):
             set_setting('shop_schedule', 'с 8:00 до 22:00 без выходных')
         if not db.session.get(Setting, 'shop_city'):
@@ -188,12 +185,11 @@ def init_db():
                 'Нижний Новгород,Челябинск,Самара,Омск,Ростов-на-Дону,'
                 'Уфа,Красноярск,Воронеж,Пермь,Волгоград')
 
-        # дефолтные страницы
         if not Page.query.filter_by(slug='about').first():
             db.session.add(Page(
                 slug='about',
                 title='О сайте',
-                content='Мы — официальный производитель и поставщик люстр.\n\n'
+                content='Мы — официальный производитель и поставщик люстр и стеклянной посуды из Гусь-Хрустального.\n\n'
                         'Более 10 лет успешной работы на рынке России.\n'
                         'Широчайший ассортимент, лучшие цены, доставка по всей стране.'
             ))
@@ -201,9 +197,9 @@ def init_db():
             db.session.add(Page(
                 slug='contacts',
                 title='Контакты',
-                content='📞 Телефон: +7 (999) 123-45-67\n'
-                        '✉ Email: info@example.com\n'
-                        '🏢 Адрес: г. Москва, ул. Примерная, д. 1\n'
+                content='📞 Телефон: +7 (904) 859-87-41\n'
+                        '✉ Email: info@posudagustut-ru.ru\n'
+                        '🏢 Адрес: г. Гусь-Хрустальный, ул. Примерная, д. 1\n'
                         '🕐 Часы работы: пн–вс, 8:00–22:00'
             ))
         if not Page.query.filter_by(slug='delivery').first():
@@ -216,7 +212,6 @@ def init_db():
             ))
         db.session.commit()
 
-        # дефолтное меню
         if not MenuItem.query.first():
             db.session.add_all([
                 MenuItem(title='Главная', url='/', order=0),
@@ -227,7 +222,6 @@ def init_db():
             ])
             db.session.commit()
 
-        # авто-исправление старых ссылок "#"
         fixed = False
         for m in MenuItem.query.all():
             if m.title == 'Главная' and m.url == '#':
@@ -238,9 +232,7 @@ def init_db():
                 m.url = '/page/contacts'; fixed = True
         if fixed:
             db.session.commit()
-            print('Ссылки в меню обновлены автоматически')
 
-        # админ
         if not User.query.filter_by(username='admin').first():
             admin = User(username='admin', is_admin=True)
             admin.set_password(os.environ.get('ADMIN_PASSWORD', 'admin123'))
@@ -248,41 +240,11 @@ def init_db():
             db.session.commit()
             print('Создан админ: admin / admin123')
 
-        # демо-категории и товары
         if not Category.query.first():
-            c1 = Category(name='Хрустальные люстры', description='Классические хрустальные люстры')
-            c2 = Category(name='Современные люстры', description='Стильные современные модели')
-            c3 = Category(name='Настенные светильники', description='Бра и настенные светильники')
-            c4 = Category(name='Подвесные светильники', description='Одиночные подвесы')
-            db.session.add_all([c1, c2, c3, c4])
-            db.session.commit()
-
-            demo_items = [
-                Item(title='Люстра хрустальная «Империя»', category_id=c1.id, price=125000,
-                     lamps=12, diameter='750 мм', height='800 мм',
-                     description='Роскошная люстра с хрустальными подвесками',
-                     is_hit=True, is_popular=True),
-                Item(title='Люстра «Классика»', category_id=c1.id, price=89000,
-                     lamps=8, diameter='700 мм', height='750 мм',
-                     description='Классическая хрустальная люстра',
-                     is_popular=True),
-                Item(title='Люстра «Модерн»', category_id=c2.id, price=45000,
-                     lamps=6, diameter='600 мм', height='480 мм',
-                     description='Стильная современная люстра',
-                     is_popular=True),
-                Item(title='Люстра «Минимализм»', category_id=c2.id, price=32000,
-                     lamps=3, diameter='420 мм', height='230 мм',
-                     description='Простая и элегантная'),
-                Item(title='Бра «Версаль»', category_id=c3.id, price=12500,
-                     lamps=1, diameter='200 мм', height='370 мм',
-                     description='Настенный светильник',
-                     is_hit=True),
-                Item(title='Подвес «Шар»', category_id=c4.id, price=8900,
-                     lamps=1, diameter='250 мм', height='450 мм',
-                     description='Одиночный подвесной светильник',
-                     is_popular=True),
-            ]
-            db.session.add_all(demo_items)
+            c1 = Category(name='Люстры', description='Хрустальные и современные люстры')
+            c2 = Category(name='Стекло', description='Стеклянная посуда ручной работы')
+            c3 = Category(name='Объявления', description='Важные объявления')
+            db.session.add_all([c1, c2, c3])
             db.session.commit()
 
 
@@ -297,7 +259,7 @@ def inject_globals():
     return {
         'menu_items': MenuItem.query.order_by(MenuItem.order).all(),
         'categories_for_menu': Category.query.all(),
-        'site_title': get_setting('site_title', '💡 Гусь-Люстра'),
+        'site_title': get_setting('site_title', 'СтеклоТутГусь'),
         'bg_color': get_setting('bg_color', '#f4f6f9'),
         'bg_image': get_setting('bg_image', ''),
         'shop_phone': get_setting('shop_phone', ''),
@@ -306,6 +268,7 @@ def inject_globals():
         'cities': cities,
         'current_city': get_current_city(),
     }
+
 
 # ---------- СМЕНА ГОРОДА ----------
 @app.route('/set-city', methods=['POST'])
@@ -316,6 +279,20 @@ def set_city():
     if city:
         resp.set_cookie('user_city', city, max_age=60 * 60 * 24 * 365)
     return resp
+
+
+# ---------- SEO: sitemap и robots ----------
+@app.route('/sitemap.xml')
+def sitemap():
+    categories = Category.query.all()
+    items = Item.query.all()
+    xml = render_template('sitemap.xml', categories=categories, items=items)
+    return Response(xml, mimetype='application/xml')
+
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('static', 'robots.txt')
 
 
 # ---------- ГЛАВНАЯ ----------
@@ -464,7 +441,7 @@ def admin_panel():
                            orders=orders,
                            current_bg_color=get_setting('bg_color', '#f4f6f9'),
                            current_bg_image=get_setting('bg_image', ''),
-                           current_site_title=get_setting('site_title', '💡 Гусь-Люстра'),
+                           current_site_title=get_setting('site_title', 'СтеклоТутГусь'),
                            current_shop_phone=get_setting('shop_phone', ''),
                            current_shop_schedule=get_setting('shop_schedule', ''),
                            current_shop_city=get_setting('shop_city', ''),
@@ -777,4 +754,4 @@ def not_found(e):
 
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=5000)

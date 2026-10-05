@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{ site_title }} — каталог товаров с доставкой по России. Оплата при получении.">
-    <title>{{ site_title }}</title>
+    <title>{% block title %}СтеклоТутГусь — хрустальные люстры, стеклянная посуда, менажницы, графины{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}СтеклоТутГусь — купить хрустальные люстры, стеклянную посуду, менажницы, графины, салатники, бокалы. Гусь-Хрустальный. Доставка по всей России, оплата при получении.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}менажница, графин, стеклянная посуда, хрустальные люстры, салатник, бокалы, стекло Гусь-Хрустальный, купить посуду{% endblock %}">
+    <link rel="canonical" href="https://posudagustut-ru.ru{{ request.path }}">
+    <meta property="og:title" content="{% block og_title %}СтеклоТутГусь — хрусталь и стеклянная посуда{% endblock %}">
+    <meta property="og:description" content="Купить хрустальные люстры, стеклянную посуду, менажницы, графины. Доставка по России.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://posudagustut-ru.ru{{ request.path }}">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -578,7 +584,7 @@
 <!-- ШАПКА -->
 <header>
     <div class="logo">
-        <a href="/">{{ site_title }}</a>
+        <a href="/">СтеклоТутГусь</a>
     </div>
 
     <nav class="main-menu">
@@ -626,7 +632,7 @@
 
 <!-- ФУТЕР -->
 <footer>
-    <p style="font-size: 18px; color: #fff; margin-bottom: 12px;"><b>{{ site_title }}</b></p>
+    <p style="font-size: 18px; color: #fff; margin-bottom: 12px;"><b>СтеклоТутГусь</b></p>
     <p>
         <a href="tel:{{ shop_phone|replace(' ', '')|replace('(', '')|replace(')', '')|replace('-', '') }}"
            style="color: #4CAF50; font-size: 17px; font-weight: bold; text-decoration: none;">
@@ -634,13 +640,18 @@
         </a>
     </p>
     <p style="margin: 8px 0;">{{ shop_schedule }} &nbsp;|&nbsp; 🏙 {{ current_city }}</p>
+    <p style="margin: 15px 0 8px;">
+        {% for c in categories_for_menu %}
+            <a href="/catalog?cat={{ c.id }}" style="color:#f39c12; margin:0 8px;">{{ c.name }}</a>
+        {% endfor %}
+    </p>
     <p style="margin-top: 15px;">
         <a href="#" onclick="openCallModal(event); return false;"
            style="color: #f39c12; text-decoration: none;">
             Заказать обратный звонок
         </a>
     </p>
-    <p style="margin-top: 20px; color: #888;">© Все права защищены</p>
+    <p style="margin-top: 20px; color: #888;">© 2026 СтеклоТутГусь — хрустальные люстры и стеклянная посуда из Гусь-Хрустального</p>
 </footer>
 
 <!-- МОДАЛКА «ЗАКАЗАТЬ ЗВОНОК» -->

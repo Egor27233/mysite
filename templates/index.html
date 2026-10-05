@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block title %}СтеклоТутГусь — хрустальные люстры, стеклянная посуда, менажницы, графины купить{% endblock %}
+{% block meta_description %}Купить хрустальные люстры, стеклянную посуду, менажницы, графины, салатники. Гусь-Хрустальный. Доставка по России, оплата при получении.{% endblock %}
+{% block meta_keywords %}менажница, графин, стеклянная посуда, хрустальные люстры, купить, Гусь-Хрустальный{% endblock %}
 {% block content %}
 
 <!-- Популярные товары -->
@@ -13,7 +16,8 @@
                 {% endif %}
                 <div class="image-wrap">
                     {% if item.image %}
-                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}">
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}"
+                             alt="{{ item.title }} — купить в СтеклоТутГусь">
                     {% else %}
                         <span class="no-img">💡</span>
                     {% endif %}
