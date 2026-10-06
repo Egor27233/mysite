@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
     <title>{% block title %}СтеклоТутГусь — хрустальные люстры, стеклянная посуда, менажницы, графины{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}СтеклоТутГусь — купить хрустальные люстры, стеклянную посуду, менажницы, графины, салатники, бокалы. Гусь-Хрустальный. Доставка по всей России, оплата при получении.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}менажница, графин, стеклянная посуда, хрустальные люстры, салатник, бокалы, стекло Гусь-Хрустальный, купить посуду{% endblock %}">
